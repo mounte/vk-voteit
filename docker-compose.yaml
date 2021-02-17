@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  smtprelay:
+    image: blueimp/aws-smtp-relay
+    env_file:
+      - smtprelay.env
+    ports:
+      - 1025:1025
+    command: -h smtp.vallhovskyrkan.se
+    networks:
+      - default
+
+
+  voteit:
+    build:
+      context: .
+    image: vkvoteit:latest
+    env_file:
+      - voteit.env
+
+    volumes: 
+      - voteitlog:/app/var/log
+      - zeodb:/app/var/zeo
+    ports:
+      - 9010:80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:voteit.wedlund.eu"
+    networks:
+      - proxy
+      - default
+
+volumes: 
+  voteitlog:
+  zeodb:
+
+networks:
+  proxy:
+    external:
+      name: portraefik_proxy
