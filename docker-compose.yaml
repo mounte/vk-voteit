@@ -16,7 +16,7 @@ services:
       context: .
     image: vkvoteit:latest
     environment: 
-      - SMTP_HOST=$SMTP_RELAY_NAME
+      - SMTP_HOST=$SMTP_RELAY_HOST
       - SMTP_PORT=$SMTP_RELAY_PORT
       - SMTP_SENDER=$SMTP_SENDER
     volumes: 
