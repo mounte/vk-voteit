@@ -1,12 +1,10 @@
 version: "3.9"
 services:
   smtprelay:
-    image: blueimp/aws-smtp-relay
     env_file:
-      - smtprelay.env
-    ports:
-      - 1025:1025
-    command: -h ${{SMTP_RELAY_HOST}}
+      - aws_ses_secret.env
+    image: blueimp/aws-smtp-relay
+    command: -h $SMTP_RELAY_GIVEN_HOST -a :$SMTP_RELAY_PORT
     networks:
       - default
     restart: always
@@ -17,9 +15,10 @@ services:
     build:
       context: .
     image: vkvoteit:latest
-    env_file:
-      - voteit.env
-
+    environment: 
+      - SMTP_HOST=$SMTP_RELAY_NAME
+      - SMTP_PORT=$SMTP_RELAY_PORT
+      - SMTP_SENDER=$SMTP_SENDER
     volumes: 
       - voteitlog:/app/var/log
       - zeodb:/app/var/zeo
@@ -27,12 +26,11 @@ services:
       - 9010:80
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.voteit.rule=Host(`${{HOST_NAME}}`)"
+      - "traefik.http.routers.voteit.rule=Host(`${VOTEIT_HOST_NAME?}`)"
       - "traefik.http.routers.voteit.entrypoints=websecure"
       - "traefik.http.services.voteit.loadbalancer.server.port=80"
       - "traefik.http.routers.voteit.tls.certresolver=leresolver"
       - "traefik.docker.network=portraefik_proxy"
-      #- "traefik.http.routers.voteit.middlewares=authelia@docker"
 
     networks:
       - proxy
