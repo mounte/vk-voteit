@@ -6,12 +6,14 @@ services:
       - smtprelay.env
     ports:
       - 1025:1025
-    command: -h smtp.vallhovskyrkan.se
+    command: -h ${{SMTP_RELAY_HOST}}
     networks:
       - default
+    restart: always
 
 
   voteit:
+    container_name: voteit
     build:
       context: .
     image: vkvoteit:latest
@@ -24,13 +26,13 @@ services:
     ports:
       - 9010:80
     labels:
-      - "traefik.http.routers.voteit.rule=Host(`voteit.wedlund.eu`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.voteit.rule=Host(`${{HOST_NAME}}`)"
       - "traefik.http.routers.voteit.entrypoints=websecure"
       - "traefik.http.services.voteit.loadbalancer.server.port=80"
       - "traefik.http.routers.voteit.tls.certresolver=leresolver"
       - "traefik.docker.network=portraefik_proxy"
       #- "traefik.http.routers.voteit.middlewares=authelia@docker"
-      #- "traefik.http.routers.grafana.service=grafana"
 
     networks:
       - proxy
